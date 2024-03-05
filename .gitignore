@@ -1,0 +1,14 @@
+/lib
+/backup
+/locale
+/wallet
+/data
+/apps
+consonoso
+consonoso.exe
+nosolite.dbg
+nosolite.rar
+gitinst.txt
+*.res
+*.lps
+*.mo

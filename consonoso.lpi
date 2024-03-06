@@ -85,6 +85,17 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
+    <RequiredPackages>
+      <Item>
+        <PackageName Value="CryptoLib4PascalPackage"/>
+      </Item>
+      <Item>
+        <PackageName Value="SimpleBaseLib4PascalPackage"/>
+      </Item>
+      <Item>
+        <PackageName Value="indylaz"/>
+      </Item>
+    </RequiredPackages>
     <Units>
       <Unit>
         <Filename Value="consonoso.lpr"/>

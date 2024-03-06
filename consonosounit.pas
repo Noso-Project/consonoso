@@ -5,7 +5,7 @@ unit consonosounit;
 INTERFACE
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,nosodebug,nosoblock;
 
 Function VerifyStructure: integer;
 
@@ -21,9 +21,10 @@ Begin
   Result := 0;
   if not directoryexists(homefolder) then
     if not CreateDir(homefolder) then Inc(Result);
-  Datafolder := HomeFolder + 'data';
+  Datafolder := HomeFolder + 'NOSODATA';
   if not directoryexists(Datafolder) then
     if not CreateDir(Datafolder) then Inc(Result);
+  //SetBlockDirectory(
 
 End;
 

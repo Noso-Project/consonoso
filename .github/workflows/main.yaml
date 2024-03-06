@@ -1,4 +1,4 @@
-name: Build NosoWallet
+name: build consonoso
 
 on:
   push:
@@ -8,17 +8,17 @@ on:
 
   pull_request:
     branches: [ main ]
-    
+
 jobs:
   build:
-    name: Build and test
+    name: Build and/or Test
     runs-on: ${{ matrix.operating-system }}
-    
+
     strategy:
       matrix:
-        operating-system: [ ubuntu-20.04, ubuntu-latest, windows-latest]
+        operating-system: [ ubuntu-20.04, ubuntu-latest, windows-latest, macos-latest ]
         lazarus-versions: [ stable]
-        
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
@@ -35,50 +35,59 @@ jobs:
     - name: Unzip packages
       run: unzip -q Packages/\*.zip -d Packages
     - name: Install packages
-      run: |
-        lazbuild -qqq Packages/Indy10/indylaz.lpk
-        lazbuild -qqq Packages/HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
-        lazbuild -qqq Packages/SimpleBaseLib/src/Packages/FPC/SimpleBaseLib4PascalPackage.lpk
-        lazbuild -qqq Packages/dcpcrypt-2.0.4.1/dcpcrypt.lpk
-        lazbuild -qqq Packages/CryptoLib4Pascal-master/CryptoLib/src/Packages/FPC/CryptoLib4PascalPackage.lpk
-        lazbuild -qqq Packages/lazbarcodes/packages/lazbarcodes_runtimeonly.lpk
-        lazbuild -qqq Packages/lazbarcodes/packages/lazbarcodes.lpk
-        
+      run: lazbuild -qqq Packages/Indy10/indylaz.lpk
+
     - name: Build the Main App (Windows)
       if: ${{ matrix.operating-system == 'windows-latest' }}
       run: |
-        lazbuild -B --bm=Release "Noso.lpi"
+        lazbuild -B --bm=Release "consominer2.lpi"
+        mv consonoso.exe consonoso-x86_64-win64.exe
 
     - name: Build the Main App (Ubuntu)
       if: ${{ matrix.operating-system == 'ubuntu-latest' }}
       run: |
-        lazbuild -B --bm=Release "Noso.lpi"
+        lazbuild -B --bm=Release "consominer2.lpi"
+        mv consonoso consonoso-x86_64-ubuntu-latest
 
     - name: Build the Main App (Ubuntu)
       if: ${{ matrix.operating-system == 'ubuntu-20.04' }}
       run: |
-        lazbuild -B --bm=Release "Noso.lpi"
-        
+        lazbuild -B --bm=Release "consominer2.lpi"
+        mv consonoso consonoso-x86_64-ubuntu-20-04
+
+    - name: Build the Main App (macOS)
+      if: ${{ matrix.operating-system == 'macos-latest' }}
+      run: |
+        lazbuild -B --bm=Release "consominer2.lpi"
+        mv consonoso consonoso-x86_64-darwin
+
     - name: Upload binary (Windows)
       if: ${{ (matrix.operating-system == 'windows-latest')  &&  (matrix.lazarus-versions == 'stable') }}
       uses: actions/upload-artifact@v2
       with:
-        name: noso-windows
-        path: Noso.exe
+        name: consonoso
+        path: consonoso-x86_64-win64.exe
 
     - name: Upload binary (Ubuntu)
       if: ${{ (matrix.operating-system == 'ubuntu-latest')  &&  (matrix.lazarus-versions == 'stable') }}
       uses: actions/upload-artifact@v2
       with:
-        name: noso-linuxnew
-        path: Noso
+        name: consonoso
+        path: consonoso-x86_64-ubuntu-latest
         
     - name: Upload binary (Ubuntu)
       if: ${{ (matrix.operating-system == 'ubuntu-20.04')  &&  (matrix.lazarus-versions == 'stable') }}
       uses: actions/upload-artifact@v2
       with:
-        name: noso-linux
-        path: Noso
+        name: consonoso
+        path: consonoso-x86_64-ubuntu-20-04
+
+    - name: Upload binary (macOS)
+      if: ${{ (matrix.operating-system == 'macos-latest')  &&  (matrix.lazarus-versions == 'stable') }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: consonoso
+        path: consonoso-x86_64-darwin
 
   package-release:
     if: contains(github.ref, '/tags/')
@@ -99,40 +108,24 @@ jobs:
       uses: actions/download-artifact@v2
 
     - name: List files
-      run: |
-          ls -al
-          ls -al noso-windows
-          ls -al noso-linuxnew
-          ls -al noso-linux
+      run: ls -alF consonoso
 
-    - name: Package Windows
+    - name: Create release files
       run: |
-          cp noso-windows/Noso.exe .
-          tag=${{ github.event.ref }}
-          tag=${tag#"refs/tags/"}
-          zip noso-${tag}-x86_64-win64.zip Noso.exe
-    - name: Package Ubuntu latest
-      run: |
-          cp noso-linuxnew/Noso .
-          tag=${{ github.event.ref }}
-          tag=${tag#"refs/tags/"}
-          chmod +x Noso
-          tar -zcvf noso-${tag}-x86_64-linuxnew.tgz Noso
-          zip -r noso-${tag}-x86_64-linuxnew.zip Noso
-    - name: Package Ubuntu 20.04
-      run: |
-          cp noso-linux/Noso .
-          tag=${{ github.event.ref }}
-          tag=${tag#"refs/tags/"}
-          chmod +x Noso
-          tar -zcvf noso-${tag}-x86_64-linux.tgz Noso
-          zip -r noso-${tag}-x86_64-linux.zip Noso    
-    - name: Upload Release
+        cd consonoso
+        chmod +x consonoso-x86_64-ubuntu-latest consonoso-x86_64-ubuntu-20-04 consonoso-x86_64-darwin
+        zip -r consonoso-${{ steps.vars.outputs.tag }}-x86_64-win64.zip consonoso-x86_64-win64.exe
+        tar -zcvf consonoso-${{ steps.vars.outputs.tag }}-x86_64-ubuntu-latest.tar.gz consonoso-x86_64-ubuntu-latest
+        tar -zcvf consonoso-${{ steps.vars.outputs.tag }}-x86_64-ubuntu-20-04.tar.gz consonoso-x86_64-ubuntu-20-04
+        tar -zcvf consonoso-${{ steps.vars.outputs.tag }}-x86_64-darwin.tar.gz consonoso-x86_64-darwin
+
+    - name: Create GitHub release
       uses: softprops/action-gh-release@v1
       with:
-          body_path: releasenotes.txt
-          files: |
-            noso-*.zip
-            noso-*.tgz
+        name: consonoso ${{ steps.vars.outputs.tag }}
+        body_path: releasenotes.txt
+        files: |
+          consonoso/*.tar.gz
+          consonoso/*.zip
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

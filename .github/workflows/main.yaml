@@ -36,29 +36,33 @@ jobs:
       run: unzip -q Packages/\*.zip -d Packages
     - name: Install packages
       run: lazbuild -qqq Packages/Indy10/indylaz.lpk
+        lazbuild -qqq Packages/HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
+        lazbuild -qqq Packages/SimpleBaseLib/src/Packages/FPC/SimpleBaseLib4PascalPackage.lpk
+        lazbuild -qqq Packages/dcpcrypt-2.0.4.1/dcpcrypt.lpk
+        lazbuild -qqq Packages/CryptoLib4Pascal-master/CryptoLib/src/Packages/FPC/CryptoLib4PascalPackage.lpk
 
     - name: Build the Main App (Windows)
       if: ${{ matrix.operating-system == 'windows-latest' }}
       run: |
-        lazbuild -B --bm=Release "consominer2.lpi"
+        lazbuild -B --bm=Release "consonoso.lpi"
         mv consonoso.exe consonoso-x86_64-win64.exe
 
     - name: Build the Main App (Ubuntu)
       if: ${{ matrix.operating-system == 'ubuntu-latest' }}
       run: |
-        lazbuild -B --bm=Release "consominer2.lpi"
+        lazbuild -B --bm=Release "consonoso.lpi"
         mv consonoso consonoso-x86_64-ubuntu-latest
 
     - name: Build the Main App (Ubuntu)
       if: ${{ matrix.operating-system == 'ubuntu-20.04' }}
       run: |
-        lazbuild -B --bm=Release "consominer2.lpi"
+        lazbuild -B --bm=Release "consonoso.lpi"
         mv consonoso consonoso-x86_64-ubuntu-20-04
 
     - name: Build the Main App (macOS)
       if: ${{ matrix.operating-system == 'macos-latest' }}
       run: |
-        lazbuild -B --bm=Release "consominer2.lpi"
+        lazbuild -B --bm=Release "consonoso.lpi"
         mv consonoso consonoso-x86_64-darwin
 
     - name: Upload binary (Windows)

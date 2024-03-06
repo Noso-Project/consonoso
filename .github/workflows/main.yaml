@@ -35,7 +35,8 @@ jobs:
     - name: Unzip packages
       run: unzip -q Packages/\*.zip -d Packages
     - name: Install packages
-      run: lazbuild -qqq Packages/Indy10/indylaz.lpk
+      run: |
+        lazbuild -qqq Packages/Indy10/indylaz.lpk
         lazbuild -qqq Packages/HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
         lazbuild -qqq Packages/SimpleBaseLib/src/Packages/FPC/SimpleBaseLib4PascalPackage.lpk
         lazbuild -qqq Packages/dcpcrypt-2.0.4.1/dcpcrypt.lpk

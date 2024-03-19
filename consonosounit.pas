@@ -16,6 +16,7 @@ Type
   end;
 
 Function VerifyStructure: integer;
+Procedure InitSettings();
 
 var
   Homefolder          : string;

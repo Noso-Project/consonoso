@@ -15,7 +15,7 @@ Type
     Comment : string;
     end;
 
-Procedure SetSettingsFilename(name:string);
+Procedure SetSettingsFilename(Fname:string);
 Procedure InitSetting(Name,value,comment:string);
 Function GetSetInt(name:string):int64;
 Function GetSetStr(name:string):string;
@@ -31,9 +31,9 @@ var
 
 IMPLEMENTATION
 
-Procedure SetSettingsFilename(name:string);
+Procedure SetSettingsFilename(Fname:string);
 Begin
-  SettingsFilename := name;
+  SettingsFilename := Fname;
   AssignFile(SetsFile, SettingsFilename);
 End;
 

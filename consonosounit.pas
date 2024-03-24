@@ -5,7 +5,8 @@ unit consonosounit;
 INTERFACE
 
 uses
-  Classes, SysUtils,nosodebug,nosoblock,nosogeneral,noso_TUI;
+  Classes, SysUtils,nosodebug,nosoblock,nosogeneral,noso_TUI,nososettings,nosounit,
+  nosoheaders, nosomasternodes;
 
 Type
   ThreadUpdate = class(TThread)
@@ -17,11 +18,11 @@ Type
 
 Function VerifyStructure: integer;
 Procedure InitSettings();
+Procedure InitFiles();
 
 var
   Homefolder          : string;
   Datafolder          : string;
-  SettingsFilename    : String = 'settings.conf';
   LogsDirectory       : string= 'NOSODATA'+DirectorySeparator+'LOGS'+DirectorySeparator;
   DeepDebLogFilename  : string= 'deepdeb.txt';
   ConsoleLogFilename  : string= 'console.txt';
@@ -83,7 +84,26 @@ End;
 
 Procedure InitSettings();
 Begin
+  SetSettingsFilename(DataFolder+DirectorySeparator+'settings.conf');
+  InitSetting('Autoserver','true','Enable node server at start');
+  InitSetting('Autoupdate','false','Update automatically new releases');
+  InitSetting('MNIP','','Masternode static IP');
+  InitSetting('MNPort','8080','Masternode TCP port');
+  InitSetting('MNFunds','','Masternode funds address');
+  InitSetting('MNSign','','Masternode sign address');
+  InitSetting('MNAutoIp','true','Use automatic IP detection for masternode');
+  InitSetting('RPCAuto','false','Enable RPC server at start');
+  InitSetting('RPCPort','8078','RPC server port');
+  If not fileexists(SettingsFilename) then SaveSettings();
+  LoadSettings();
+End;
 
+Procedure InitFiles();
+Begin
+  SetHeadersFileName(DataFolder+DirectorySeparator+'blchhead.nos');
+  ToLog('console','Headers file ok');
+  SetMasternodesFilename(DataFolder+DirectorySeparator+'masternodes.txt');
+  ToLog('console','Masternodes file ok');
 End;
 
 INITIALIZATION

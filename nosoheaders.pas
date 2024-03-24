@@ -11,7 +11,7 @@ Stand alone unit to control headers file.
 interface
 
 uses
-  Classes, SysUtils, Nosodebug,nosocrypto;
+  Classes, SysUtils, Nosodebug,nosocrypto, nosogeneral;
 
 Type
 
@@ -67,6 +67,7 @@ Begin
   Result := true;
   ResumenFilename := Filename;
   assignfile(FileResumen,ResumenFilename);
+  if not Fileexists(ResumenFilename) then CreateEmptyFile(ResumenFilename);
   SetResumenHash();
 End;
 
@@ -101,6 +102,7 @@ Begin
   NewData.block     := BlockNumber;
   NewData.blockhash := BlockHash;
   NewData.SumHash   := SumHash;
+  filemode := 2;
   EnterCriticalSection(CS_HeadersFile);
   TRY
     reset(FileResumen);
@@ -125,6 +127,7 @@ var
   PorperlyClosed : boolean = false;
 Begin
   Result := true;
+  filemode := 2;
   EnterCriticalSection(CS_HeadersFile);
   TRY
     reset(FileResumen);
@@ -243,7 +246,6 @@ Begin
   TRY
     reset(FileResumen);
     Opened := true;
-    ToDeepDeb('NosoHeaders,LastHeadersString,'+'Opened');
     ThisData := Default(ResumenData);
     seek(fileResumen,FromBlock-100);
     While not Eof(fileResumen) do
@@ -253,7 +255,6 @@ Begin
       end;
     closefile(FileResumen);
     PorperlyClosed := true;
-    ToDeepDeb('NosoHeaders,LastHeadersString,'+'Closed');
   EXCEPT on E:Exception do
     begin
     ToDeepDeb('NosoHeaders,LastHeadersString,'+E.Message);

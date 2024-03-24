@@ -70,12 +70,15 @@ function SaveTextToDisk(const aFileName: TFileName; const aText: String): Boolea
 Function LoadTextFromDisk(const aFileName: TFileName): string;
 function TryCopyFile(Source, destination:string):boolean;
 function TryDeleteFile(filename:string):boolean;
+function AppFileName():string;
 Function MixTxtFiles(ListFiles : array of string;Destination:String;DeleteSources:boolean=true):boolean ;
 Function SendFileViaTCP(filename,message,host:String;Port:integer):Boolean;
 Function UnzipFile(filename:String;delFile:boolean):boolean;
+Function CreateEmptyFile(lFilename:String):Boolean;
 
-{Orders Related}
+{Protocol specific}
 function GetStringFromOrder(order:Torderdata):String;
+function ExtractMNsText(lText:String):String;
 
 IMPLEMENTATION
 
@@ -322,7 +325,7 @@ End;
 
 // Gets OS version
 function OSVersion: string;
-begin
+Begin
   {$IFDEF LCLcarbon}
   OSVersion := 'Mac OS X 10.';
   {$ELSE}
@@ -338,7 +341,7 @@ begin
   {$ENDIF}
   {$ENDIF}
   {$ENDIF}
-end;
+End;
 
 {$ENDREGION}
 
@@ -462,6 +465,13 @@ Begin
   result := deletefile(filename);
 End;
 
+// Returns the name of the app file without path
+function AppFileName():string;
+Begin
+  result := ExtractFileName(ParamStr(0));
+  // For working path: ExtractFilePAth
+End;
+
 Function MixTxtFiles(ListFiles : array of string;Destination:String;DeleteSources:boolean=true):boolean ;
 var
   count      : integer = 0;
@@ -519,7 +529,7 @@ Begin
   EXCEPT on E:Exception do
     begin
     Result := false;
-    ToDeepDeb('NosoGeneral,SendFile,'+E.Message);
+    ToDeepDeb('NosoGeneral,SendFile,'+filename+' Error: '+E.Message);
     end;
   END;{Try}
   if client.Connected then Client.Disconnect();
@@ -549,9 +559,27 @@ Begin
   UnZipper.Free;
 End;
 
+// Creates an empty file
+Function CreateEmptyFile(lFilename:String):Boolean;
+var
+  lFile : textfile;
+Begin
+  result := true;
+  TRY
+    Assignfile(lFile, lFilename);
+    rewrite(lFile);
+    Closefile(lFile);
+  EXCEPT on E:Exception do
+    begin
+    ToDeepDeb('Nosogeneral,CreateEmptyFile,'+E.Message);
+    result := false;
+    end;
+  END;
+End;
+
 {$ENDREGION}
 
-{$REGION Orders related}
+{$REGION Protocol specific}
 
 // Convierte una orden en una cadena para compartir
 function GetStringFromOrder(order:Torderdata):String;
@@ -572,7 +600,17 @@ Begin
          Order.TrfrID;
 End;
 
-{$ENDREGION Orders related}
+function ExtractMNsText(lText:String):String;
+  var
+  startpos : integer;
+  content : string;
+Begin
+  Result := '';
+  startpos := Pos('$',lText);
+  Result := Copy(lText,Startpos+1,Length(lText));
+End;
+
+{$ENDREGION Protocol specific}
 
 
 END.{UNIT}

@@ -76,6 +76,8 @@ Begin
   UpdateThread.Start;
   ToLog('console','Files structure verified');
   InitSettings();
+  ToLog('console','Settings loaded');
+  InitFiles();
 
   ToLog('console','Press enter to finish');
   Readln();

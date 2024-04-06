@@ -6,10 +6,18 @@ INTERFACE
 
 uses
   Classes, SysUtils,nosodebug,nosoblock,nosogeneral,noso_TUI,nososettings,nosounit,
-  nosoheaders, nosomasternodes;
+  nosoheaders, nosomasternodes, nosonosocfg, nosotime,nosoconsensus;
 
 Type
   ThreadUpdate = class(TThread)
+    protected
+      procedure Execute; override;
+    public
+      constructor Create(const CreatePaused: Boolean);
+  end;
+
+Type
+  ThreadTUI = class(TThread)
     protected
       procedure Execute; override;
     public
@@ -27,6 +35,7 @@ var
   DeepDebLogFilename  : string= 'deepdeb.txt';
   ConsoleLogFilename  : string= 'console.txt';
   UpdateThread        : ThreadUpdate;
+  TUIThread           : ThreadTUI;
   UseTUI              : boolean = true;
   LastLogLine         : string;
 
@@ -56,6 +65,38 @@ Begin
 End;
 
 {$ENDREGION Thread update}
+
+{$REGION Thread TUI}
+
+constructor ThreadTUI.Create(const CreatePaused: Boolean);
+Begin
+  inherited Create(CreatePaused);
+  FreeOnTerminate := True;
+End;
+
+procedure ThreadTUI.Execute;
+const
+  LastUpdate : int64 = 0;
+Begin
+  while not terminated do
+    begin
+    if UTCTime > LastUpdate then
+      begin
+      LastUpdate := UTCTime;
+      SetContol('clock',TimestampToDate(UTCTime));
+      SetContol('l_Head',format(' %s/%s ',[Copy(GetResumenHash,1,5),GetConsensus(5)]));
+      SetContol('l_Block',format(' %s/%s ',['xxxxxx',GetConsensus(2)]));
+
+      SetContol('l_CFG',format(' %s/%s ',[Copy(GetCFGHash,1,5),GetConsensus(19)]));
+
+      SetContol('l_MNs',format(' %s/%s ',[Copy(GetMNsHash,1,5),GetConsensus(8)]));
+
+      SetContol('l_Merkle',format(' %s/%s ',['xxxxx',copy(GetConsensus(0),0,5)]),true);
+      end;
+    end;
+End;
+
+{$ENDREGION Thread TUI}
 
 Function VerifyStructure: integer;
 Begin
@@ -104,6 +145,12 @@ Begin
   ToLog('console','Headers file ok');
   SetMasternodesFilename(DataFolder+DirectorySeparator+'masternodes.txt');
   ToLog('console','Masternodes file ok');
+  SetCFGFilename(DataFolder+DirectorySeparator+'nosocfg.psk');
+  ToLog('console','NosoCFG file ok');
+  GetTimeOffset(PArameter(GetCFGDataStr,2));
+  ToLog('console','Time set from server '+NosoT_LastServer);
+  SetNodesArray(GetCFGDataStr(1));
+
 End;
 
 INITIALIZATION

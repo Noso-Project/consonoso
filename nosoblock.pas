@@ -66,7 +66,7 @@ var
   DBFile              : file of TDBRecord;
   CSDBFile            : TRTLCriticalSection;
   CSDBIndex           : TRTLCriticalSection;
-  OrderIDIndex        : Array of TindexRecord;
+  OrderIDIndex        : Array of TIndexRecord;
 
 IMPLEMENTATION
 
